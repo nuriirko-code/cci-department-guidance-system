@@ -22,6 +22,9 @@ app.get('/', (req, res) => {
 const questionRoutes = require('./routes/questionRoutes')
 app.use('/api/questions', questionRoutes)
 
+const quizRoutes = require('./routes/quizRoutes')
+app.use('/api/quiz', quizRoutes)
+
 
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
