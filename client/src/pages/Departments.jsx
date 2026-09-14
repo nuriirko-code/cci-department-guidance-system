@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import departments from '../data/departmentMeta'
+import { useState, useEffect } from 'react'
+import { getAllDepartments } from '../services/api'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
@@ -16,6 +17,21 @@ function Avatar({ name, photo, size = 'h-20 w-20' }) {
 const ORDER = ['CS', 'SWE', 'IT', 'IS', 'ISC', 'STAT']
 
 function Departments() {
+ const [departments, setDepartments] = useState({})
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getAllDepartments()
+      .then((data) => {
+        const asObject = {}
+        data.forEach((dept) => { asObject[dept.code] = dept })
+        setDepartments(asObject)
+        setLoading(false)
+      })
+      .catch((err) => console.error(err))
+  }, [])
+
+  if (loading) return <p className="p-10 text-center">Loading departments...</p>
   return (
     <main className="min-h-screen bg-slate-50 font-['IBM_Plex_Sans'] text-slate-800 antialiased">
       <Navbar />
@@ -23,7 +39,7 @@ function Departments() {
       {/* Hero Header Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-indigo-900 via-slate-900 to-slate-900 px-6 pt-24 pb-20 text-white">
         <div className="mx-auto max-w-4xl text-center">
-          <Avatar name="Afendi Abdi" photo="./images/cci-dean.png" size="mx-auto h-24 w-24 ring-4 ring-indigo-400/30" />
+          <Avatar name="Afendi Abdi" photo="/images/cci-dean.png" size="mx-auto h-24 w-24 ring-4 ring-indigo-400/30" />
           <span className="mt-6 inline-block rounded-full bg-indigo-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-indigo-300 ring-1 ring-indigo-400/30">
             A message from the Dean
           </span>

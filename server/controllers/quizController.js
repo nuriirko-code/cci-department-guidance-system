@@ -5,8 +5,14 @@ const QuizResponse = require('../models/QuizResponse')
 async function submitQuiz(req, res) {
   try {
     const { answers } = req.body
+    if (!answers || typeof answers !== 'object') {
+      return res.status(400).json({ message: 'Quiz answers are required' })
+    }
 
     const questions = await Question.find()
+    if (questions.length === 0) {
+      return res.status(400).json({ message: 'No quiz questions are available. Seed the database first.' })
+    }
     const scores = { CS: 0, SWE: 0, IT: 0, IS: 0, ISC: 0, STAT: 0 }
 
     questions.forEach((question) => {
@@ -36,6 +42,9 @@ async function submitQuiz(req, res) {
 
     const top = ranked[0]
     const topDepartment = await Department.findOne({ code: top.code })
+    if (!topDepartment) {
+      return res.status(400).json({ message: `Department data for ${top.code} is missing. Seed the database first.` })
+    }
 
     const explanationText = `Your answers show ${topDepartment.blurb} — the strongest signal among all six CCI departments.`
 

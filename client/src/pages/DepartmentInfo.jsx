@@ -1,5 +1,7 @@
 import { useParams, Link, Navigate } from 'react-router-dom'
-import departments from '../data/departmentMeta'
+import { useState, useEffect } from 'react'
+import { getDepartment } from '../services/api'
+
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
@@ -13,7 +15,7 @@ function Avatar({ name, photo, size = 'h-20 w-20' }) {
   )
 }
 
-function TagList({ items, color }) {
+function TagList({ items }) {
   return (
     <div className="flex flex-wrap gap-2">
       {items.map((item) => (
@@ -30,7 +32,19 @@ function TagList({ items, color }) {
 
 function DepartmentInfo() {
   const { code } = useParams()
-  const dept = departments[code?.toUpperCase()]
+  const [dept, setDept] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
+
+  useEffect(() => {
+    getDepartment(code)
+      .then((data) => { setDept(data); setLoading(false) })
+      .catch(() => { setNotFound(true); setLoading(false) })
+  }, [code])
+
+  if (loading) return <p className="p-10 text-center">Loading...</p>
+  if (notFound) return <Navigate to="/departments" replace />
+
   if (!dept) return <Navigate to="/departments" replace />
 
   return (

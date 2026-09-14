@@ -1,13 +1,29 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import questions from '../data/mockQuestions'
+import { getQuestions, submitQuiz } from '../services/api'
 import QuestionCard from '../components/QuestionCard'
 
 
 function Questionnaire() {
+   const [questions, setQuestions] = useState([])
+  const [loading, setLoading] = useState(true)
   const [currentIndex, setCurrentIndex] = useState(0)
+
+
   const [answers, setAnswers] = useState({})// We're starting with an empty object because the student hasn't answered anything yet.
   const navigate = useNavigate()
+
+
+
+  useEffect(() => {
+    getQuestions()
+      .then(setQuestions)
+      .catch((error) => console.error('Failed to load questions:', error))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return <p className="p-10 text-center">Loading questions...</p>
+  if (questions.length === 0) return <p className="p-10 text-center">Questions are not available yet. Please seed the database and try again.</p>
 
   const currentQuestion = questions[currentIndex]
 
@@ -19,20 +35,21 @@ function Questionnaire() {
 }
 
 
-  function handleNext() {
+ async function handleNext() {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1)
-    } 
-    else {
+    } else {
+      try {
+        // 1. Send student choices to Express backend calculation engine
+        const result = await submitQuiz(answers)
 
-
-  navigate('/results', {
-    state: {
-      answers: answers,
-    },
-  })
-}
-}
+        // 2. Navigate to results page passing the calculated match object
+        navigate('/results', { state: { result } })
+      } catch (error) {
+        console.error('Failed to submit quiz:', error)
+      }
+    }
+  }
 
   function handlePrevious() {
     if (currentIndex > 0) {

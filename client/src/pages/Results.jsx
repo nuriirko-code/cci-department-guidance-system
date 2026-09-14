@@ -1,15 +1,23 @@
+import { useEffect, useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
-import questions from '../data/mockQuestions'
-import departments from '../data/departmentMeta'
-import { calculateScores, getMaxPossibleScores, toPercentages, getRankedMatches } from '../utils/scoring'
+import { getAllDepartments } from '../services/api'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
 function Results() {
   const location = useLocation()
-  const answers = location.state?.answers
+  const result = location.state?.result
+  const [departments, setDepartments] = useState({})
 
-  if (!answers) {
+  useEffect(() => {
+    if (!result) return
+
+    getAllDepartments().then((data) => {
+      setDepartments(Object.fromEntries(data.map((department) => [department.code, department])))
+    }).catch((error) => console.error('Failed to load departments:', error))
+  }, [result])
+
+  if (!result) {
     return (
       <main className="flex min-h-screen flex-col justify-between bg-slate-50 font-['IBM_Plex_Sans'] text-slate-800 antialiased">
         <Navbar />
@@ -35,13 +43,9 @@ function Results() {
     )
   }
 
-  const rawScores = calculateScores(answers, questions)
-  const maxScores = getMaxPossibleScores(questions)
-  const percentages = toPercentages(rawScores, maxScores)
-  const ranked = getRankedMatches(percentages)
-  const [top, ...rest] = ranked
-  const secondary = rest.slice(0, 3)
-  const topDept = departments[top.code]
+  const top = result.topMatch
+  const secondary = result.secondaryMatches
+  const topDept = departments[top.code] || top
 
   return (
     <main className="min-h-screen bg-slate-50 font-['IBM_Plex_Sans'] text-slate-800 antialiased">
@@ -94,7 +98,7 @@ function Results() {
 
             <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-600">
               Your answers strongly align with students who excel in{' '}
-              <strong className="text-slate-900 font-semibold">{topDept.blurb}</strong>. This field fits your preferred balance of technical execution and analytical thinking.
+              <strong className="text-slate-900 font-semibold">{top.explanation}</strong>
             </p>
           </div>
 
@@ -110,7 +114,7 @@ function Results() {
                 Core Synergy
               </h3>
               <p className="mt-2 text-xs leading-relaxed text-slate-600">
-                Your answers reflect a preference for {topDept.blurb}. This department directly emphasizes those key strengths throughout its curriculum.
+                {top.explanation}
               </p>
             </div>
 
@@ -123,7 +127,7 @@ function Results() {
                 Curriculum Focus
               </h3>
               <p className="mt-2 text-xs leading-relaxed text-slate-600">
-                {topDept.overview || "Hands-on projects, modern lab environments, and collaborative coursework tailored to industry requirements."}
+                {topDept.overview || 'Department details are loading.'}
               </p>
             </div>
 
@@ -175,7 +179,7 @@ function Results() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {secondary.map((m) => {
-            const dept = departments[m.code]
+            const dept = departments[m.code] || { name: m.code, color: '#4f46e5' }
             return (
               <div
                 key={m.code}

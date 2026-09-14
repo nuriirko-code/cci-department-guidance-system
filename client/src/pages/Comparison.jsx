@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import departments from '../data/departmentMeta'
+import { getAllDepartments } from '../services/api'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
@@ -33,8 +33,19 @@ function Cell({ dept, row }) {
 }
 
 function Comparison() {
-  const codes = Object.keys(departments)
+  const [departments, setDepartments] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [selected, setSelected] = useState(['CS', 'SWE'])
+
+  useEffect(() => {
+    getAllDepartments()
+      .then((data) => setDepartments(Object.fromEntries(data.map((department) => [department.code, department]))))
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const codes = Object.keys(departments)
 
   function toggle(code) {
     setSelected((prev) => {
@@ -53,6 +64,9 @@ function Comparison() {
       : selected.length === 3
       ? 'sm:grid-cols-3 max-w-6xl'
       : 'sm:grid-cols-4 max-w-7xl'
+
+  if (loading) return <p className="p-10 text-center">Loading departments...</p>
+  if (error) return <p className="p-10 text-center">Unable to load departments: {error}</p>
 
   return (
     <main className="min-h-screen bg-slate-50 font-['IBM_Plex_Sans'] text-slate-800 antialiased">
