@@ -6,9 +6,14 @@ import Results from './pages/Results'
 import Departments from './pages/Departments'
 import DepartmentInfo from './pages/DepartmentInfo'
 import Comparison from './pages/Comparison'
+import AdminLogin from './pages/admin/AdminLogin'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import ProtectedRoute from './components/admin/ProtectedRoute'
+import { AuthProvider } from './context/AuthContext'
 
 function App() {
 return (
+  <AuthProvider>
     <BrowserRouter>
     <Routes>
       <Route path = "/" element = {<Welcome />} />
@@ -17,8 +22,13 @@ return (
        <Route path="/departments" element= {<Departments />} />
        <Route path="/departments/:code" element={ <DepartmentInfo />} />
        <Route path="/compare"   element ={ <Comparison />} />
+       <Route path="/admin/login" element={<AdminLogin />} />
+       <Route element={<ProtectedRoute />}>
+         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+       </Route>
     </Routes>
   </BrowserRouter>
+  </AuthProvider>
 )
 }
 
