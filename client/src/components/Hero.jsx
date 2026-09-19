@@ -51,7 +51,7 @@ function Hero() {
           <div className="absolute -bottom-6 -left-6 rounded-xl border border-white/10 bg-[#141D33] p-4 shadow-2xl">
             <p className="font-['IBM_Plex_Mono'] text-[10px] uppercase tracking-wider text-[#6B7488]">Top Match</p>
             <p className="bg-gradient-to-r from-[#7C9CFF] to-[#B18CFF] bg-clip-text font-['Space_Grotesk'] text-lg font-semibold text-transparent">
-              Computer Science — 87%
+              Computer Science — 92%
             </p>
           </div>
         </div>
