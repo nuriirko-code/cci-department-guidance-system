@@ -3,13 +3,16 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 
 function AdminLogin() {
+  //Authentication office, give me the current authentication status and the login function.
   const { isAuthenticated, login } = useAuth()
+  // navigate is a function that allows us to programmatically navigate to a different route. location is an object that represents the current URL. We can use it to get the state that was passed to the login page when the user was redirected there.
   const navigate = useNavigate()
   const location = useLocation()
+  // credentials are login form's memory,
   const [credentials, setCredentials] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
-
+// if admin is already logged in, redirect to dashboard. This is useful if the user refreshes the page while on the login page.
   useEffect(() => {
     if (isAuthenticated) navigate('/admin/dashboard', { replace: true })
   }, [isAuthenticated, navigate])
@@ -19,11 +22,15 @@ function AdminLogin() {
   }
 
   async function handleSubmit(event) {
+    //Don't perform the browser's default form submission. I'll handle it with JavaScript. 
     event.preventDefault()
+    // suppose admin enetered wrong password and get invalid credentials error, then admin corrects the credentials and submits again. We want to clear the previous error message before attempting to log in again.
     setError('')
     setSaving(true)
     try {
+      // when this executes, the admin login component is saying "Authentication office, please authenticate these credentials.
       await login(credentials)
+      // if the login is successful, the admin login component is saying "Authentication office, please navigate to the dashboard page. If the user was redirected to the login page from another page, navigate back to that page instead."
       navigate(location.state?.from || '/admin/dashboard', { replace: true })
     } catch (requestError) {
       setError(requestError.message)

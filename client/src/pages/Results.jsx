@@ -1,13 +1,23 @@
 import { useEffect, useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
-import { getAllDepartments } from '../services/api'
+import { getAllDepartments, submitFeedback } from '../services/api'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
 function Results() {
-  const location = useLocation()
+  {/* useLocation() is a hook from react-router-dom that returns the current location object.
+     This object contains information about the current URL, including the pathname, search parameters, and state.
+      In this case, we are using it to access the state passed from the previous page (Questionnaire.jsx) when navigating to the Results page. 
+      The state contains the result of the quiz submission, which includes the top match and secondary matches for department recommendations. */}
+  const location = useLocation() 
   const result = location.state?.result
   const [departments, setDepartments] = useState({})
+  {/* The useState hook is used to create state variables for managing feedback form data and submission status.*/}
+  const [feedbackChoice, setFeedbackChoice] = useState(null)
+  const [feedbackComment, setFeedbackComment] = useState('')
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(() => sessionStorage.getItem('cci_feedback_submitted') === 'true')
+  const [feedbackSaving, setFeedbackSaving] = useState(false)
+  const [feedbackError, setFeedbackError] = useState('')
 
   useEffect(() => {
     if (!result) return
@@ -46,6 +56,27 @@ function Results() {
   const top = result.topMatch
   const secondary = result.secondaryMatches
   const topDept = departments[top.code] || top
+
+  async function handleFeedbackSubmit(event) {
+    event.preventDefault()
+    if (feedbackChoice === null) return
+
+    setFeedbackSaving(true)
+    setFeedbackError('')
+    try {
+      await submitFeedback({
+        matchedDepartmentCode: top.code,
+        helpful: feedbackChoice,
+        comment: feedbackComment.trim(),
+      })
+      sessionStorage.setItem('cci_feedback_submitted', 'true')
+      setFeedbackSubmitted(true)
+    } catch (error) {
+      setFeedbackError(error.message)
+    } finally {
+      setFeedbackSaving(false)
+    }
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 font-['IBM_Plex_Sans'] text-slate-800 antialiased">
@@ -97,7 +128,6 @@ function Results() {
             </div>
 
             <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-600">
-              Your answers strongly align with students who excel in{' '}
               <strong className="text-slate-900 font-semibold">{top.explanation}</strong>
             </p>
           </div>
@@ -228,6 +258,54 @@ function Results() {
             Retake Assessment
           </Link>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-2xl px-6 pb-16">
+        {feedbackSubmitted ? (
+          <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-5 text-center text-sm font-semibold text-emerald-700">
+            Thanks for your feedback.
+          </p>
+        ) : (
+          <form onSubmit={handleFeedbackSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8">
+            <h2 className="font-['Space_Grotesk'] text-xl font-bold text-slate-900">Was this recommendation helpful?</h2>
+            <div className="mt-5 flex justify-center gap-3">
+              <button
+                type="button"
+                aria-label="Yes, this recommendation was helpful"
+                aria-pressed={feedbackChoice === true}
+                onClick={() => setFeedbackChoice(true)}
+                className={`rounded-xl border px-5 py-3 text-2xl transition ${feedbackChoice === true ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 hover:border-emerald-300'}`}
+              >
+                👍
+              </button>
+              <button
+                type="button"
+                aria-label="No, this recommendation was not helpful"
+                aria-pressed={feedbackChoice === false}
+                onClick={() => setFeedbackChoice(false)}
+                className={`rounded-xl border px-5 py-3 text-2xl transition ${feedbackChoice === false ? 'border-red-500 bg-red-50' : 'border-slate-200 hover:border-red-300'}`}
+              >
+                👎
+              </button>
+            </div>
+            <textarea
+              value={feedbackComment}
+              onChange={(event) => setFeedbackComment(event.target.value)}
+              maxLength={500}
+              rows={3}
+              placeholder="Optional comment"
+              className="mt-5 w-full rounded-xl border border-slate-200 px-4 py-3 text-left text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+            />
+            {feedbackError && <p className="mt-3 text-left text-sm text-red-600">{feedbackError}</p>}
+            <button
+              type="submit"
+              disabled={feedbackChoice === null || feedbackSaving}
+              className="mt-4 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {feedbackSaving ? 'Sending...' : 'Send feedback'}
+            </button>
+          </form>
+        )}
       </section>
 
       <Footer />

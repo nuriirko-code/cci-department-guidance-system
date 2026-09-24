@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-
+//Middleware means: "Before the request reaches the actual operation, perform these checks first."
 function authenticateToken(req, res, next) {
   const authorization = req.headers.authorization
   const token = authorization?.startsWith('Bearer ')

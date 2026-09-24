@@ -8,6 +8,7 @@ const Department = require('./models/Department')
  const departmentsData = [
     {
       code: 'CS',
+      order: 1,
       name: 'Computer Science',
       color: '#378ADD',
       blurb: 'a love for abstract problem-solving, algorithms, and theoretical depth',
@@ -31,6 +32,7 @@ const Department = require('./models/Department')
 
       {
     code: 'SWE',    
+    order: 2,
     name: 'Software Engineering', color: '#639922',
     blurb: 'a preference for hands-on building and shipping real, working software',
     verified: 'general', hod: { name: null, photo: null },
@@ -47,6 +49,7 @@ const Department = require('./models/Department')
 
  {
     code: 'IT',
+   order: 3,
     name: 'Information Technology', color: '#BA7517',
     blurb: 'an interest in infrastructure, networks, and keeping systems running',
     verified: 'general', hod: { name: null, photo: null },
@@ -62,6 +65,7 @@ const Department = require('./models/Department')
   },
    {
     code: 'IS',
+    order: 4,
     name: 'Information Systems', color: '#7F77DD',
     blurb: 'a focus on how technology supports organizations and business processes',
     verified: 'general', hod: { name: null, photo: null },
@@ -77,6 +81,7 @@ const Department = require('./models/Department')
   },
    {
     code: 'ISC',
+    order: 5,
     name: 'Information Science', color: '#D4537E',
     blurb: 'a strength in organizing, structuring, and making information accessible',
     verified: 'general', hod: { name: null, photo: null },
@@ -92,6 +97,7 @@ const Department = require('./models/Department')
   },
    {
     code: 'STAT',
+    order: 6,
     name: 'Statistics', color: '#D85A30',
     blurb: 'a talent for mathematical reasoning and finding patterns in data',
     verified: 'general', hod: { name: null, photo: null },
@@ -115,7 +121,7 @@ async function seed() {
   console.log('Cleared existing departments')
 
   await Department.insertMany(departmentsData)
-  console.log('All 6 departments seeded successfully')
+  console.log('All departments seeded successfully')
 
   await mongoose.connection.close()
 }

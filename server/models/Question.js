@@ -6,13 +6,11 @@ const questionSchema = new mongoose.Schema({
   text: { type: String, required: true },
   options: [{
     text: { type: String, required: true },
+      // A Map keeps scoring data open to any department code, so adding a department later does not require a schema change or deployment.
     weights: {
-      CS: { type: Number, required: true },
-      SWE: { type: Number, required: true },
-      IT: { type: Number, required: true },
-      IS: { type: Number, required: true },
-      ISC: { type: Number, required: true },
-      STAT: { type: Number, required: true },
+        type: Map,
+        of: Number,
+        default: {},
     },
   }],
 })

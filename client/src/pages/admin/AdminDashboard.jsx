@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { createDepartment, deleteDepartment, getAllDepartments, updateDepartment } from '../../services/api'
+import { Link } from 'react-router-dom'
+import { createDepartment, deleteDepartment, getAllDepartments, getAllFeedback, updateDepartment } from '../../services/api'
 import { useAuth } from '../../context/useAuth'
 import DepartmentForm from '../../components/admin/DepartmentForm'
 import DepartmentTable from '../../components/admin/DepartmentTable'
@@ -7,6 +8,7 @@ import DepartmentTable from '../../components/admin/DepartmentTable'
 function AdminDashboard() {
   const { logout } = useAuth()
   const [departments, setDepartments] = useState([])
+  const [feedback, setFeedback] = useState([])
   const [selected, setSelected] = useState(null)
   const [editing, setEditing] = useState(null)
   const [showForm, setShowForm] = useState(false)
@@ -17,8 +19,14 @@ function AdminDashboard() {
 
   useEffect(() => {
     let active = true
-    getAllDepartments()
-      .then((data) => { if (active) setDepartments(data) })
+    //fetch all departments from database.
+    Promise.all([getAllDepartments(), getAllFeedback()])
+      .then(([departmentData, feedbackData]) => {
+        if (active) {
+          setDepartments(departmentData)
+          setFeedback(feedbackData)
+        }
+      })
       .catch((requestError) => { if (active) setError(requestError.message) })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
@@ -34,7 +42,9 @@ function AdminDashboard() {
   function beginEdit(department) {
     setEditing(department)
     setShowForm(true)
+    //clear previous error.
     setError('')
+    //clear previous notice.
     setNotice('')
   }
 
@@ -78,7 +88,7 @@ function AdminDashboard() {
       </header>
 
       <div className="mx-auto max-w-7xl px-6 py-8">
-        <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-sm font-semibold text-indigo-600">Overview</p><h2 className="mt-1 font-['Space_Grotesk'] text-3xl font-bold text-slate-950">Departments</h2><p className="mt-2 text-sm text-slate-500">The records below are shared directly with the student-facing application.</p></div><button onClick={beginCreate} className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700">+ Add department</button></div>
+        <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-sm font-semibold text-indigo-600">Overview</p><h2 className="mt-1 font-['Space_Grotesk'] text-3xl font-bold text-slate-950">Departments</h2><p className="mt-2 text-sm text-slate-500">The records below are shared directly with the student-facing application.</p></div><div className="flex flex-wrap gap-3"><Link to="/admin/questions" className="rounded-xl border border-indigo-200 bg-white px-5 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-50">Manage assessment scoring</Link><button onClick={beginCreate} className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700">+ Add department</button></div></div>
         {notice && <p className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{notice}</p>}
         {error && <p className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
@@ -89,6 +99,30 @@ function AdminDashboard() {
         <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <div>{loading ? <div className="rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center text-sm text-slate-500">Loading departments...</div> : <DepartmentTable departments={departments} selectedId={selected?._id} onSelect={setSelected} onEdit={beginEdit} onDelete={removeDepartment} />}</div>
           <DepartmentDetails department={selected} />
+        </section>
+
+        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+          <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Student voice</p>
+              <h2 className="mt-1 font-['Space_Grotesk'] text-2xl font-bold text-slate-950">Recommendation feedback</h2>
+            </div>
+            <p className="text-sm text-slate-500">{feedback.length} response{feedback.length === 1 ? '' : 's'}</p>
+          </div>
+          {feedback.length === 0 ? (
+            <p className="mt-6 rounded-xl border border-dashed border-slate-300 px-5 py-8 text-center text-sm text-slate-500">No student feedback has been submitted yet.</p>
+          ) : (
+            <div className="mt-6 divide-y divide-slate-100">
+              {feedback.map((item) => (
+                <article key={item._id} className="grid gap-3 py-5 sm:grid-cols-[8rem_8rem_minmax(0,1fr)_8rem] sm:items-start">
+                  <span className="font-['IBM_Plex_Mono'] text-sm font-semibold text-slate-700">{item.matchedDepartmentCode}</span>
+                  <span className={item.helpful ? 'font-semibold text-emerald-600' : 'font-semibold text-red-600'}>{item.helpful ? 'Helpful' : 'Not helpful'}</span>
+                  <p className="text-sm leading-relaxed text-slate-600">{item.comment || 'No comment provided.'}</p>
+                  <time className="text-xs text-slate-400 sm:text-right" dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleDateString()}</time>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </main>

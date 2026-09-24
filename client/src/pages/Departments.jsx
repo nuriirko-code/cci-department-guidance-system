@@ -14,7 +14,7 @@ function Avatar({ name, photo, size = 'h-20 w-20' }) {
   )
 }
 
-const ORDER = ['CS', 'SWE', 'IT', 'IS', 'ISC', 'STAT']
+
 
 function Departments() {
  const [departments, setDepartments] = useState({})
@@ -28,7 +28,10 @@ function Departments() {
         setDepartments(asObject)
         setLoading(false)
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error(err)
+        setLoading(false)
+      })
   }, [])
 
   if (loading) return <p className="p-10 text-center">Loading departments...</p>
@@ -61,7 +64,7 @@ function Departments() {
             <span className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Our History</span>
             <h2 className="mt-2 font-['Space_Grotesk'] text-2xl font-bold text-slate-900">How CCI came to be</h2>
             <p className="mt-4 text-sm leading-relaxed text-slate-600">
-              The Faculty of Computing and Informatics was established during the 2008/09 academic year alongside Applied Sciences. Reorganized into ten colleges, CCI is now home to six departments training Ethiopia's next generation of tech leaders.
+              The Faculty of Computing and Informatics was established during the 2008/09 academic year alongside Applied Sciences. Reorganized into ten colleges, CCI is home to departments training Ethiopia's next generation of tech leaders.
             </p>
           </div>
 
@@ -70,7 +73,7 @@ function Departments() {
             <span className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Leadership & Structure</span>
             <h2 className="mt-2 font-['Space_Grotesk'] text-2xl font-bold text-slate-900">How the college is organized</h2>
             <p className="mt-4 text-sm leading-relaxed text-slate-600">
-              CCI is led by a College Dean overseeing six specialized departments—Computer Science, Software Engineering, IT, IS, Information Science, and Statistics—each headed by its own HOD and batch advisors.
+              CCI is led by a College Dean overseeing specialized departments, each headed by its own HOD and batch advisors.
             </p>
           </div>
 
@@ -105,12 +108,13 @@ function Departments() {
           </div>
 
           <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {ORDER.map((code) => {
-              const dept = departments[code]
+            {Object.values(departments)
+           .sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER))
+           .map((dept) => {
               return (
                 <Link
-                  key={code}
-                  to={`/departments/${code}`}
+                  key={dept._id || dept.code}
+                  to={`/departments/${dept.code}`}
                   className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-800 bg-slate-800/60 p-6 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:border-indigo-500/50 hover:bg-slate-800 hover:shadow-2xl hover:shadow-indigo-500/10"
                 >
                   <div>

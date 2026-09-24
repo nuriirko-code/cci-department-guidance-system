@@ -26,6 +26,8 @@ app.use('/api/questions', questionRoutes)
 const quizRoutes = require('./routes/quizRoutes')
 app.use('/api/quiz', quizRoutes)
 
+const feedbackRoutes = require('./routes/feedbackRoutes')
+app.use('/api/feedback', feedbackRoutes)
 
 const authRoutes = require('./routes/authRoutes')
 app.use('/api/auth', authRoutes)

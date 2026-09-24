@@ -8,12 +8,11 @@ import DepartmentInfo from './pages/DepartmentInfo'
 import Comparison from './pages/Comparison'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminQuestions from './pages/admin/AdminQuestions'
 import ProtectedRoute from './components/admin/ProtectedRoute'
-import { AuthProvider } from './context/AuthContext'
 
 function App() {
 return (
-  <AuthProvider>
     <BrowserRouter>
     <Routes>
       <Route path = "/" element = {<Welcome />} />
@@ -25,10 +24,10 @@ return (
        <Route path="/admin/login" element={<AdminLogin />} />
        <Route element={<ProtectedRoute />}>
          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+         <Route path="/admin/questions" element={<AdminQuestions />} />
        </Route>
     </Routes>
   </BrowserRouter>
-  </AuthProvider>
 )
 }
 

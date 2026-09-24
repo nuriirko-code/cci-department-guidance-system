@@ -7,6 +7,11 @@ const departmentSchema = new mongoose.Schema({
         unique: true,
         uppercase: true
     },
+      order: {
+        type: Number,
+        required: true,
+        default: 0
+    },
     name: {
         type: String,
         required: true

@@ -4,15 +4,15 @@ const {
 	getAllDepartments,
 	getDepartmentByCode,
 	createDepartment,
-	updateDepartment,
-	deleteDepartment,
+	updateDepartmentById,
+	deleteDepartmentById,
 } = require('../controllers/departmentController')
 const { authenticateToken, requireAdmin } = require('../middleware/auth')
 
 router.get('/', getAllDepartments)
 router.post('/', authenticateToken, requireAdmin, createDepartment)
-router.put('/:id', authenticateToken, requireAdmin, updateDepartment)
-router.delete('/:id', authenticateToken, requireAdmin, deleteDepartment)
+router.put('/:id', authenticateToken, requireAdmin, updateDepartmentById)
+router.delete('/:id', authenticateToken, requireAdmin, deleteDepartmentById)
 
 router.get('/:code', getDepartmentByCode)
 

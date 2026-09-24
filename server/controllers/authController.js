@@ -5,7 +5,7 @@ const Admin = require('../models/Admin')
 async function login(req, res) {
   try {
     const { username, password } = req.body
-
+//Go to the Admin collection and find one administrator whose username matches this username."
     const admin = await Admin.findOne({ username })
     if (!admin) return res.status(401).json({ message: 'Invalid credentials' })
 

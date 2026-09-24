@@ -14,6 +14,15 @@ function Navbar() {
           <Link to="/questionnaire" className="rounded-lg bg-gradient-to-r from-[#5B7FFF] to-[#9B6BFF] px-4 py-2 text-white transition hover:opacity-90">
             Start Assessment
           </Link>
+          <span className="h-6 w-px bg-white/15" aria-hidden="true" />
+          <Link
+            to="/admin/login"
+            aria-label="Staff login"
+            title="Staff login"
+            className="text-sm text-[#7182A8] transition hover:text-[#C8D3EE]"
+          >
+            🔒
+          </Link>
         </div>
       </div>
     </nav>

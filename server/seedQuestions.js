@@ -1,4 +1,5 @@
 
+// Weight keys must match a Department.code exactly; this cross-collection relationship is enforced by seed/admin validation convention because MongoDB cannot enforce a foreign key for Map keys.
 require('dotenv').config()
 const mongoose = require('mongoose')
 const connectDB = require('./config/db')
