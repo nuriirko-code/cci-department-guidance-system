@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const COMPETENCIES = require('../config/competencies')
 
 const questionSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
@@ -6,12 +7,8 @@ const questionSchema = new mongoose.Schema({
   text: { type: String, required: true },
   options: [{
     text: { type: String, required: true },
-      // A Map keeps scoring data open to any department code, so adding a department later does not require a schema change or deployment.
-    weights: {
-        type: Map,
-        of: Number,
-        default: {},
-    },
+    // Options describe the competencies they measure; department-specific values come only from Department.competencyProfile at scoring time.
+    competencies: [{ type: String, enum: COMPETENCIES, required: true }],
   }],
 })
 

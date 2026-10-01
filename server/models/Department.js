@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const COMPETENCIES = require('../config/competencies')
 
 const departmentSchema = new mongoose.Schema({
     code: {
@@ -23,6 +24,24 @@ const departmentSchema = new mongoose.Schema({
      blurb: {
         type: String,
         required: true
+    },
+    // This replaces ad hoc per-question weights with one reviewable table per department, with every value traceable to documented overview and skillsNeeded evidence.
+    competencyProfile: {
+      type: Map,
+      of: { type: Number, min: 0, max: 3 },
+      default: {},
+      validate: {
+        validator(profile) {
+          return [...profile.keys()].every((key) => COMPETENCIES.includes(key))
+        },
+        message: 'Competency profile contains an unknown competency key',
+      },
+    },
+    // Provenance makes profile values auditable; requiring it prevents unsupported competency scores from appearing as authoritative facts.
+    assessmentNotes: {
+      type: String,
+      required: true,
+      trim: true,
     },
     verified: {
         type: String,

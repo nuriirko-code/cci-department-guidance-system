@@ -12,6 +12,9 @@ const Department = require('./models/Department')
       name: 'Computer Science',
       color: '#378ADD',
       blurb: 'a love for abstract problem-solving, algorithms, and theoretical depth',
+      // These values translate the supplied department matrix into one evidence-backed profile instead of repeating department scores on every answer option.
+      competencyProfile: { programming: 3, algorithmicTheory: 3, softwareEngPractice: 1, systemsInfrastructure: 0, dataStatAnalysis: 1, infoOrganization: 0, businessAlignment: 0, securityAwareness: 1, collaborativeWork: 1, independentAnalyticalWork: 3 },
+      assessmentNotes: 'Based on direct HOD interview (Sept 2026): emphasis on problem-solving mindset, algorithmic thinking, ~48 courses balanced theory/practical; distinguishing trait stated as strong theoretical/mathematical component. Confidence: HOD-verified.',
       verified: 'hod',
       hod: { name: 'Alemu Gudeta', photo: null },
       history: {
@@ -35,6 +38,8 @@ const Department = require('./models/Department')
     order: 2,
     name: 'Software Engineering', color: '#639922',
     blurb: 'a preference for hands-on building and shipping real, working software',
+    competencyProfile: { programming: 3, algorithmicTheory: 1, softwareEngPractice: 3, systemsInfrastructure: 1, dataStatAnalysis: 0, infoOrganization: 0, businessAlignment: 1, securityAwareness: 0, collaborativeWork: 3, independentAnalyticalWork: 1 },
+    assessmentNotes: 'Based on general/international program description (departmentMeta.js overview): full software development lifecycle, team-based iterative delivery, hands-on building emphasis. Not yet confirmed by SWE HOD. Confidence: general — pending HOD review.',
     verified: 'general', hod: { name: null, photo: null },
     history: { established: 'Founding year pending direct confirmation from the department', origin: 'Established within the College of Computing and Informatics as a distinct discipline from Computer Science, focused specifically on engineering practices for building reliable software.' },
     overview: 'Focuses on the full software development lifecycle: requirements, design, implementation, testing, and maintenance, with emphasis on team-based, iterative delivery.',
@@ -52,6 +57,8 @@ const Department = require('./models/Department')
    order: 3,
     name: 'Information Technology', color: '#BA7517',
     blurb: 'an interest in infrastructure, networks, and keeping systems running',
+    competencyProfile: { programming: 1, algorithmicTheory: 0, softwareEngPractice: 0, systemsInfrastructure: 3, dataStatAnalysis: 0, infoOrganization: 0, businessAlignment: 1, securityAwareness: 2, collaborativeWork: 1, independentAnalyticalWork: 1 },
+    assessmentNotes: 'Based on general/international program description: networks, systems administration, hardware, infrastructure maintenance focus. Confidence: general — pending HOD review.',
     verified: 'general', hod: { name: null, photo: null },
     history: { established: 'Split off from an earlier combined Computer Science and IT department; exact founding year pending direct confirmation', origin: 'Formed as CCI grew, focusing specifically on the practical deployment and maintenance of computing infrastructure.' },
     overview: 'Centers on networks, systems administration, hardware, and the infrastructure that keeps organizational technology running reliably.',
@@ -68,6 +75,8 @@ const Department = require('./models/Department')
     order: 4,
     name: 'Information Systems', color: '#7F77DD',
     blurb: 'a focus on how technology supports organizations and business processes',
+    competencyProfile: { programming: 1, algorithmicTheory: 0, softwareEngPractice: 1, systemsInfrastructure: 1, dataStatAnalysis: 1, infoOrganization: 1, businessAlignment: 3, securityAwareness: 0, collaborativeWork: 3, independentAnalyticalWork: 0 },
+    assessmentNotes: 'Based on general/international program description: bridges technical and business/organizational needs, business process analysis focus. Confidence: general — pending HOD review.',
     verified: 'general', hod: { name: null, photo: null },
     history: { established: 'Founding year pending direct confirmation from the department', origin: 'Established to bridge the gap between technical computing and organizational/business needs within CCI.' },
     overview: 'Studies how information technology supports and improves organizational decision-making, business processes, and management.',
@@ -84,6 +93,8 @@ const Department = require('./models/Department')
     order: 5,
     name: 'Information Science', color: '#D4537E',
     blurb: 'a strength in organizing, structuring, and making information accessible',
+    competencyProfile: { programming: 0, algorithmicTheory: 0, softwareEngPractice: 0, systemsInfrastructure: 0, dataStatAnalysis: 1, infoOrganization: 3, businessAlignment: 1, securityAwareness: 0, collaborativeWork: 1, independentAnalyticalWork: 2 },
+    assessmentNotes: 'Based on general/international program description: information organization, knowledge management, retrieval systems focus. Confidence: general — pending HOD review.',
     verified: 'general', hod: { name: null, photo: null },
     history: { established: 'Founding year pending direct confirmation from the department', origin: 'Established within CCI to address the growing need for organizing, managing, and providing access to information and data resources.' },
     overview: 'Focuses on organizing, structuring, and providing access to information — spanning data organization, knowledge management, and information retrieval systems.',
@@ -100,6 +111,8 @@ const Department = require('./models/Department')
     order: 6,
     name: 'Statistics', color: '#D85A30',
     blurb: 'a talent for mathematical reasoning and finding patterns in data',
+    competencyProfile: { programming: 0, algorithmicTheory: 2, softwareEngPractice: 0, systemsInfrastructure: 0, dataStatAnalysis: 3, infoOrganization: 0, businessAlignment: 0, securityAwareness: 0, collaborativeWork: 0, independentAnalyticalWork: 3 },
+    assessmentNotes: 'Based on general/international program description: mathematical/statistical theory, probability, data analysis for decision-making. Confidence: general — pending HOD review.',
     verified: 'general', hod: { name: null, photo: null },
     history: { established: 'Founding year pending direct confirmation from the department', origin: 'Established within CCI to provide specialized training in statistical theory and data analysis.' },
     overview: 'Centers on mathematical and statistical theory, probability, and the analysis of data to support evidence-based decision-making.',
@@ -117,11 +130,15 @@ const Department = require('./models/Department')
 async function seed() {
   await connectDB()
 
-  await Department.deleteMany({})
-  console.log('Cleared existing departments')
-
-  await Department.insertMany(departmentsData)
-  console.log('All departments seeded successfully')
+  // Upsert only the six supplied baseline profiles so seeding competency data does not erase departments admins added later.
+  await Department.bulkWrite(departmentsData.map((department) => ({
+    updateOne: {
+      filter: { code: department.code },
+      update: { $set: department },
+      upsert: true,
+    },
+  })))
+  console.log('Baseline department profiles seeded successfully')
 
   await mongoose.connection.close()
 }

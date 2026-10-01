@@ -83,7 +83,7 @@ function Questionnaire() {
           </div>
         </div>
 
-        {/* Current question this is whete the parent sends information to the child*/}
+        {/* Current question this is where the parent sends information to the child*/}
         <QuestionCard 
         question={currentQuestion} 
         selectedAnswer={answers[currentQuestion.id]}   

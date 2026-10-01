@@ -61,8 +61,8 @@ export function getAllQuestionsForAdmin() {
 }
 
 // Saving options through this authenticated call is what lets an admin make a new department part of recommendations.
-export function updateQuestionWeights(id, options) {
-  return request(`/questions/${id}/weights`, {
+export function updateQuestionCompetencies(id, options) {
+  return request(`/questions/${id}/competencies`, {
     method: 'PUT',
     body: JSON.stringify({ options }),
   })

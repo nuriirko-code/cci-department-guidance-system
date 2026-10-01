@@ -83,12 +83,14 @@ function AdminDashboard() {
       <header className="border-b border-slate-800 bg-slate-950 text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <div><p className="font-['IBM_Plex_Mono'] text-xs uppercase tracking-[0.2em] text-indigo-300">CCI Guidance</p><h1 className="mt-1 font-['Space_Grotesk'] text-xl font-bold">Department administration</h1></div>
+          <Link to="/admin/questions" className="rounded-xl border border-indigo-200 bg-white px-5 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-50">Manage assessment scoring</Link>
           <button onClick={logout} className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-slate-800">Log out</button>
         </div>
       </header>
 
       <div className="mx-auto max-w-7xl px-6 py-8">
-        <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-sm font-semibold text-indigo-600">Overview</p><h2 className="mt-1 font-['Space_Grotesk'] text-3xl font-bold text-slate-950">Departments</h2><p className="mt-2 text-sm text-slate-500">The records below are shared directly with the student-facing application.</p></div><div className="flex flex-wrap gap-3"><Link to="/admin/questions" className="rounded-xl border border-indigo-200 bg-white px-5 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-50">Manage assessment scoring</Link><button onClick={beginCreate} className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700">+ Add department</button></div></div>
+        <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-sm font-semibold text-indigo-600">Overview</p>
+        <h2 className="mt-1 font-['Space_Grotesk'] text-3xl font-bold text-slate-950">Departments</h2><p className="mt-2 text-sm text-slate-500">The records below are shared directly with the student-facing application.</p></div><div className="flex flex-wrap gap-3"><Link to="/admin/questions" className="rounded-xl border border-indigo-200 bg-white px-5 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-50">Manage assessment scoring</Link><button onClick={beginCreate} className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700">+ Add department</button></div></div>
         {notice && <p className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{notice}</p>}
         {error && <p className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 

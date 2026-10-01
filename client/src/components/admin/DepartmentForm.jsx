@@ -1,3 +1,5 @@
+import competencies from '../../data/competencies'
+
 const EMPTY_DEPARTMENT = {
   code: '',
   name: '',
@@ -14,6 +16,8 @@ const EMPTY_DEPARTMENT = {
   facilities: '',
   activities: [],
   careerPaths: [],
+  competencyProfile: {},
+  assessmentNotes: '',
   marketDemand: '',
   postgrad: '',
 }
@@ -28,6 +32,7 @@ function toFormValues(department) {
     skillsNeeded: department.skillsNeeded || [],
     activities: department.activities || [],
     careerPaths: department.careerPaths || [],
+    competencyProfile: department.competencyProfile || {},
   }
 }
 
@@ -53,6 +58,9 @@ function DepartmentForm({ department, onSubmit, onCancel, saving }) {
       facilities: formData.get('facilities').trim(),
       activities: formData.get('activities').split('\n').map((item) => item.trim()).filter(Boolean),
       careerPaths: formData.get('careerPaths').split('\n').map((item) => item.trim()).filter(Boolean),
+      // Serialize the fixed competency table as numeric values so Mongoose stores a Map compatible with the quiz scorer.
+      competencyProfile: Object.fromEntries(competencies.map(({ key }) => [key, Number(formData.get(`competencyProfile.${key}`) || 0)])),
+      assessmentNotes: formData.get('assessmentNotes').trim(),
       marketDemand: formData.get('marketDemand').trim(),
       postgrad: formData.get('postgrad').trim(),
     }
@@ -105,6 +113,34 @@ function DepartmentForm({ department, onSubmit, onCancel, saving }) {
 
       <Field name="marketDemand" label="Market demand" defaultValue={values.marketDemand} multiline />
       <Field name="postgrad" label="Postgraduate opportunities" defaultValue={values.postgrad} multiline />
+
+      {/* Keep each department's competency values beside their evidence so admins can review what the scoring profile is based on. */}
+      <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+        <div>
+          <h3 className="font-['Space_Grotesk'] font-bold text-slate-900">Assessment competency profile</h3>
+          <p className="mt-1 text-sm text-slate-500">Rate each documented competency from 0 (not characteristic) to 3 (strongly characteristic).</p>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {competencies.map(({ key, label }) => (
+            <label key={key} className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700">
+              {label}
+              <input
+                name={`competencyProfile.${key}`}
+                type="number"
+                min="0"
+                max="3"
+                step="1"
+                required
+                defaultValue={values.competencyProfile[key] ?? 0}
+                className="w-16 rounded-lg border border-slate-300 px-2 py-2 text-center outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+              />
+            </label>
+          ))}
+        </div>
+        <div className="mt-5">
+          <Field name="assessmentNotes" label="Source / evidence for these competency ratings" defaultValue={values.assessmentNotes} required multiline hint="Required; e.g. HOD interview or curriculum description" />
+        </div>
+      </section>
 
       <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
         <button type="button" onClick={onCancel} className="rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>

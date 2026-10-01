@@ -18,16 +18,17 @@ async function submitQuiz(req, res) {
     }
 
     // Load both collections so recommendations reflect the current departments and their current question-scoring rules.
+    //load departments dynamically: asks mongoDB  What departments exist right now? so it changes dynamically as the admin adds or removes departments. This is important because the quiz is designed to be flexible and adapt to changes in the department offerings.
     const questions = await Question.find()
     const departments = await Department.find()
     if (questions.length === 0) {
       return res.status(400).json({ message: 'No quiz questions are available. Seed the database first.' })
-    }
+    }       
     if (departments.length === 0) {
       return res.status(400).json({ message: 'No departments are available. Seed the database first.' })
     }
 
-    // Initialize scores from MongoDB rather than a fixed list, allowing every current department to participate.
+    // Initialize one total per current department so the same scoring code handles any department count.
     const scores = {}
     const maxScores = {}
     departments.forEach((department) => {
@@ -35,23 +36,31 @@ async function submitQuiz(req, res) {
       maxScores[department.code] = 0
     })
 
-    // Resolve each submitted option against the Mongoose question document so its Map weights can be read with .get().
+    // Resolve submitted answers to trusted stored option tags; the request cannot fabricate competency labels or scores.
     questions.forEach((question) => {
       const selected = answers[question.id]
-      if (!selected || !selected.weights) return
+      if (!selected?.text) return
       const selectedOption = question.options.find((option) => option.text === selected.text)
       if (!selectedOption) return
-      Object.keys(scores).forEach((departmentCode) => {
-        const weight = selectedOption.weights.get(departmentCode) || 0
-        scores[departmentCode] += weight
+
+      // Convert this selected option's competency tags into one score per department using only the documented profile Map.
+      departments.forEach((department) => {
+        const optionScore = selectedOption.competencies.reduce(
+          (total, competency) => total + (department.competencyProfile.get(competency) || 0),
+          0,
+        )
+        scores[department.code] += optionScore
       })
     })
 
-    // Calculate each department's maximum possible score dynamically so percentages remain comparable for newly added departments.
+    // Normalize against each department's best available tag match per question, making percentages comparable across different profile strengths.
     questions.forEach((question) => {
-      Object.keys(maxScores).forEach((departmentCode) => {
-        const highest = Math.max(...question.options.map((option) => option.weights.get(departmentCode) || 0))
-        maxScores[departmentCode] += highest
+      departments.forEach((department) => {
+        const highest = Math.max(0, ...question.options.map((option) => (option.competencies || []).reduce(
+          (total, competency) => total + (department.competencyProfile.get(competency) || 0),
+          0,
+        )))
+        maxScores[department.code] += highest
       })
     })
 
@@ -61,7 +70,8 @@ async function submitQuiz(req, res) {
       percentages[dept] = maxScores[dept] > 0 ? Math.round((scores[dept] / maxScores[dept]) * 100) : 0
     })
 
-    // Rank every current department so the first result is the recommendation and the next results become alternatives on Results.jsx.
+   // Rank every current department so the first result is the recommendation and the next results become alternatives on Results.jsx.
+   //do you know what b.percent - a.percent means? It means: "sort the departments in descending order based on their percentage scores, so the department with the highest score comes first." why minus? Because in JavaScript's sort function, returning a negative value means "a comes before b," and returning a positive value means "b comes before a." By subtracting b.percent from a.percent, we ensure that higher percentages (better matches) are sorted to the front of the array.
     const ranked = Object.entries(percentages)
       .map(([code, percent]) => ({ code, percent }))
       .sort((a, b) => b.percent - a.percent)
