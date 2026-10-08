@@ -94,7 +94,7 @@ function DepartmentForm({ department, onSubmit, onCancel, saving }) {
         <Field name="faculty" label="Faculty" defaultValue={values.faculty} />
         <Field name="facilities" label="Facilities" defaultValue={values.facilities} />
       </div>
-
+ 
       <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
         <h3 className="font-['Space_Grotesk'] font-bold text-slate-900">Leadership and history</h3>
         <div className="mt-4 grid gap-5 sm:grid-cols-2">

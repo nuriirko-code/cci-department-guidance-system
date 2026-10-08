@@ -19,7 +19,7 @@ function AdminDashboard() {
 
   useEffect(() => {
     let active = true
-    //fetch all departments from database.
+    //fetch all departments from database. set them in react  state. fetch all feedback from database. set them in state.
     Promise.all([getAllDepartments(), getAllFeedback()])
       .then(([departmentData, feedbackData]) => {
         if (active) {
